@@ -1,0 +1,79 @@
+version: '3.9'
+
+networks:
+  private_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.0/24
+
+services:
+  # Proxy reverso
+  nginx:
+    image: nginx:latest
+    container_name: reverse_proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - private_network
+    depends_on:
+      - app1
+      - app2
+      - app3
+
+  # Aplicação 1
+  app1:
+    image: php:8.1-apache
+    container_name: app1
+    volumes:
+      - ./app1:/var/www/html
+    networks:
+      - private_network
+
+  # Aplicação 2
+  app2:
+    image: php:8.1-apache
+    container_name: app2
+    volumes:
+      - ./app2:/var/www/html
+    networks:
+      - private_network
+
+  # Aplicação 3
+  app3:
+    image: php:8.1-apache
+    container_name: app3
+    volumes:
+      - ./app3:/var/www/html
+    networks:
+      - private_network
+
+  # Banco de dados para cada aplicação
+  db1:
+    image: mysql:8.0
+    container_name: db1
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: app1db
+    networks:
+      - private_network
+
+  db2:
+    image: mysql:8.0
+    container_name: db2
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: app2db
+    networks:
+      - private_network
+
+  db3:
+    image: mysql:8.0
+    container_name: db3
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: app3db
+    networks:
+      - private_network
