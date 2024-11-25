@@ -42,6 +42,7 @@ networks:
       config:
         - subnet: 10.10.10.112/28
 
+
 services:
   # Proxy reverso
   nginx:
@@ -53,6 +54,9 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
     networks:
       - proxy_net
+      - app1_net
+      - app2_net
+      - app3_net
     depends_on:
       - app1
       - app2
