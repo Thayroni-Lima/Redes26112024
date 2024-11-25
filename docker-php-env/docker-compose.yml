@@ -1,4 +1,47 @@
-version: "3.9"
+version: '3.9'
+
+networks:
+  proxy_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.0/28
+  app1_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.16/28
+  app2_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.32/28
+  app3_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.48/28
+  db1_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.64/28
+  db2_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.80/28
+  db3_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.96/28
+  backup_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.112/28
+
 services:
   # Proxy reverso
   nginx:
@@ -9,8 +52,7 @@ services:
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
     networks:
-      proxy_net:
-        ipv4_address: 10.10.10.2
+      - proxy_net
     depends_on:
       - app1
       - app2
@@ -23,8 +65,7 @@ services:
     volumes:
       - ./app1:/var/www/html
     networks:
-      app1_net:
-        ipv4_address: 10.10.10.18
+      - app1_net
 
   # Aplicação 2
   app2:
@@ -33,8 +74,7 @@ services:
     volumes:
       - ./app2:/var/www/html
     networks:
-      app2_net:
-        ipv4_address: 10.10.10.34
+      - app2_net
 
   # Aplicação 3
   app3:
@@ -43,10 +83,9 @@ services:
     volumes:
       - ./app3:/var/www/html
     networks:
-      app3_net:
-        ipv4_address: 10.10.10.50
+      - app3_net
 
-  # Banco de Dados 1
+  # Banco de dados 1
   db1:
     image: mysql:8.0
     container_name: db1
@@ -54,12 +93,10 @@ services:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: app1db
     networks:
-      db1_net:
-        ipv4_address: 10.10.10.66
-      backup_net1:
-        ipv4_address: 10.10.10.113
+      - db1_net
+      - backup_net
 
-  # Banco de Dados 2
+  # Banco de dados 2
   db2:
     image: mysql:8.0
     container_name: db2
@@ -67,12 +104,10 @@ services:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: app2db
     networks:
-      db2_net:
-        ipv4_address: 10.10.10.82
-      backup_net2:
-        ipv4_address: 10.10.10.129
+      - db2_net
+      - backup_net
 
-  # Banco de Dados 3
+  # Banco de dados 3
   db3:
     image: mysql:8.0
     container_name: db3
@@ -80,166 +115,36 @@ services:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: app3db
     networks:
-      db3_net:
-        ipv4_address: 10.10.10.98
-      backup_net3:
-        ipv4_address: 10.10.10.145
+      - db3_net
+      - backup_net
 
-  # PhpMyAdmin 1
-  phpmyadmin1:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin1
-    environment:
-      PMA_HOST: db1
-    ports:
-      - "8081:80"
-    networks:
-      db1_net:
-        ipv4_address: 10.10.10.68
-
-  # PhpMyAdmin 2
-  phpmyadmin2:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin2
-    environment:
-      PMA_HOST: db2
-    ports:
-      - "8082:80"
-    networks:
-      db2_net:
-        ipv4_address: 10.10.10.84
-
-  # PhpMyAdmin 3
-  phpmyadmin3:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin3
-    environment:
-      PMA_HOST: db3
-    ports:
-      - "8083:80"
-    networks:
-      db3_net:
-        ipv4_address: 10.10.10.100
-
-  # Contêineres de Avaliação
-  eval_proxy:
+  # Containers de avaliação
+  jadilson_full_proxy:
     image: jadilsonpaiva/full
-    container_name: eval_proxy
+    container_name: jadilson_proxy
     networks:
-      proxy_net:
-        ipv4_address: 10.10.10.1
+      - proxy_net
 
-  eval_app1:
+  jadilson_full_app1:
     image: jadilsonpaiva/full
-    container_name: eval_app1
+    container_name: jadilson_app1
     networks:
-      app1_net:
-        ipv4_address: 10.10.10.17
+      - app1_net
 
-  eval_app2:
+  jadilson_full_app2:
     image: jadilsonpaiva/full
-    container_name: eval_app2
+    container_name: jadilson_app2
     networks:
-      app2_net:
-        ipv4_address: 10.10.10.33
+      - app2_net
 
-  eval_app3:
+  jadilson_full_app3:
     image: jadilsonpaiva/full
-    container_name: eval_app3
+    container_name: jadilson_app3
     networks:
-      app3_net:
-        ipv4_address: 10.10.10.49
+      - app3_net
 
-  eval_db1:
+  jadilson_full_backup:
     image: jadilsonpaiva/full
-    container_name: eval_db1
+    container_name: jadilson_backup
     networks:
-      db1_net:
-        ipv4_address: 10.10.10.65
-
-  eval_db2:
-    image: jadilsonpaiva/full
-    container_name: eval_db2
-    networks:
-      db2_net:
-        ipv4_address: 10.10.10.81
-
-  eval_db3:
-    image: jadilsonpaiva/full
-    container_name: eval_db3
-    networks:
-      db3_net:
-        ipv4_address: 10.10.10.97
-
-  eval_backup1:
-    image: jadilsonpaiva/full
-    container_name: eval_backup1
-    networks:
-      backup_net1:
-        ipv4_address: 10.10.10.114
-
-  eval_backup2:
-    image: jadilsonpaiva/full
-    container_name: eval_backup2
-    networks:
-      backup_net2:
-        ipv4_address: 10.10.10.130
-
-  eval_backup3:
-    image: jadilsonpaiva/full
-    container_name: eval_backup3
-    networks:
-      backup_net3:
-        ipv4_address: 10.10.10.146
-
-networks:
-  proxy_net:
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.10.10.0/28
-  app1_net:
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.10.10.16/28
-  app2_net:
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.10.10.32/28
-  app3_net:
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.10.10.48/28
-  db1_net:
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.10.10.64/28
-  db2_net:
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.10.10.80/28
-  db3_net:
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.10.10.96/28
-  backup_net1:
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.10.10.112/28
-  backup_net2:
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.10.10.128/28
-  backup_net3:
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.10.10.144/28
+      - backup_net
